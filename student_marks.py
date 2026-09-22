@@ -8,7 +8,7 @@ students = db["students_details"]
 def Main():
     lop = 1
     while lop==1:
-        print("Welcome to Student Management System \n 1.Add Student \n 2.Search Details \n 3.Update Student Details \n 4.Quit")
+        print("Welcome to Student Management System \n 1.Add Student \n 2.Search Details \n 3.Update Student Details \n 4.Delete a Student")
         lis = int(input("Enter your Option  :   "))
 
         if lis == 1:
@@ -18,7 +18,7 @@ def Main():
         elif lis == 3:
              UpdateStudent()
         else:
-            break
+            Delete_Students()
 def AddStudent():
     new_id = int(input("Enter the Student Roll Number  :  "))
     new_name = input("Enter the Student Name  :  ")
@@ -81,12 +81,14 @@ def SearchStudent_DOB():
               print(i["id"] , "\t" , i["name"])
          print("--------------------------")
 def UpdateStudent():
-     print("Update Student Details  \n 1.Search by Name \n 2.Search by Roll Number \n 3.Search by DOB")
+     print("Update Student Details  \n 1.Search by Name \n 2.Search by Roll Number")
      option_box = int(input("Enter your Option  :  "))
      if option_box==1:
           UpdateStudent_Name()
+     elif option_box == 2:
+          UpdateStudent_Roll()
 def UpdateStudent_Name():
-     search_box = input("Enter the Student Name to be Updated  :  ")
+     search_box = input("Search the Student Name to be Updated  :  ")
      results = students.find({
           "name" : {
                "$regex" : search_box ,
@@ -109,6 +111,44 @@ def UpdateStudent_Name():
                {"name" : result_roll["name"]} ,
                {"$set" : {"name" : name_update}}
           )
+     elif student_update == 2:
+          dob_update = int(input("Enter the New Date of Birth  :  "))
+          students.update_one(
+                 {"dob" : result_roll["dob"]},
+                 {"$set" : {"dob" : dob_update}}
+          )
+     print("--------------------  Updated Details  ----------------------")
      new_name_updated = students.find_one({'id' : update_box})
-     print(new_name_updated)
+     print(new_name_updated["name"] , new_name_updated["dob"])
+def UpdateStudent_Roll():
+     roll_search_box = int(input("Enter the Roll Number to be Changed  :  "))
+     roll_find = students.find_one({"id" : roll_search_box})
+     print("Name \t   DOB")
+     print(roll_find["name"] , roll_find["dob"])
+     print("---------------Enter the Details to Change --------------------- \n 1. Name \n 2.DOB")
+     student_update = int(input("Choose your Option  :  "))
+     if student_update == 1:
+               name_update = input("Enter the New Name  :  ")
+               students.update_one(
+                    {"name" : roll_find["name"]} ,
+                    {"$set" : {"name" : name_update}}
+               )
+     elif student_update == 2:
+               dob_update = int(input("Enter the New Date of Birth  :  "))
+               students.update_one(
+                      {"dob" : roll_find["dob"]},
+                      {"$set" : {"dob" : dob_update}}
+               )
+     print("--------------------  Updated Details  ----------------------")
+     new_name_updated = students.find_one({'id' : roll_search_box})
+     print(new_name_updated["name"] , new_name_updated["dob"])
+def Delete_Students():
+     remove_student = int(input("Enter a Roll Number to be deleted  :  "))
+     agreement = input("Confirmation? (y/n)")
+     if agreement == "Y" or "y":
+          students.delete_one({"id" : remove_student})
+          print("Student ", remove_student , "has deleted Successfully")
+     else:
+          Main()
+
 Main()
